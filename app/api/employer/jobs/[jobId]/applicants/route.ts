@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/dbConnect";
 import Application from "@/models/Application";
 import { auth } from "@/auth";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { jobId: string } }
+  req: NextRequest,
+  context: { params: Promise<{ jobId: string }> }
 ) {
   try {
     await connectDB();
@@ -18,7 +18,7 @@ export async function GET(
       );
     }
 
-    const { jobId } = params;
+    const { jobId } = await context.params;
 
     // ✅ Fetch applicants for this specific job
     const applicants = await Application.find({ jobId })

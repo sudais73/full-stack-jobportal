@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-hot-toast';
 
 export default function SeekerProfilePage() {
@@ -28,9 +28,12 @@ export default function SeekerProfilePage() {
             resumeURL: data.user.resumeURL || '',
           });
         }
-      } catch (err:any) {
-        toast.error('Failed to load profile', err);
-      }
+      } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            toast.error(err.response?.data?.message || 'Internal server error');
+          } finally {
+            setLoading(false);
+          }
     };
     fetchProfile();
   }, []);
@@ -44,11 +47,12 @@ export default function SeekerProfilePage() {
         skills: profile.skills.split(',').map((s) => s.trim()),
       });
       if (data.success) toast.success('Profile updated successfully!');
-    } catch (err:any) {
-      toast.error('Error saving profile', err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            toast.error(err.response?.data?.message || 'Internal server error');
+          } finally {
+            setLoading(false);
+          }
   };
 
   return (

@@ -3,8 +3,16 @@ import { connectDB } from '@/lib/dbConnect';
 import Job from '@/models/Job';
 import Application from '@/models/Application';
 import { auth } from '@/auth';
-import mongoose from 'mongoose';
+import mongoose, { FilterQuery } from 'mongoose';
 import User from '@/models/user';
+
+interface JobDoc {
+  _id: mongoose.Types.ObjectId;
+  title: string;
+  description?: string;
+  skills?: string[];
+  department?: string;
+}
 
 export async function GET() {
   try {
@@ -27,11 +35,13 @@ export async function GET() {
 
     // ✅ 3. Find jobs already applied by this user
     const appliedApps = await Application.find({ seekerId: user._id }, 'jobId');
-    const appliedJobIds = appliedApps.map((a) => new mongoose.Types.ObjectId(a.jobId));
+    const appliedJobIds = appliedApps.map(
+      (a) => new mongoose.Types.ObjectId(a.jobId)
+    );
 
-    // ✅ 4. Build recommendation query
-    const query: any = {
-      _id: { $nin: appliedJobIds }, // exclude applied jobs
+    // ✅ 4. Build recommendation query with proper type
+    const query: FilterQuery<JobDoc> = {
+      _id: { $nin: appliedJobIds },
     };
 
     if (userSkills.length > 0 || userDepartment) {
@@ -59,6 +69,9 @@ export async function GET() {
     return NextResponse.json({ success: true, jobs });
   } catch (error) {
     console.error('Recommended jobs error:', error);
-    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: 'Server error' },
+      { status: 500 }
+    );
   }
 }

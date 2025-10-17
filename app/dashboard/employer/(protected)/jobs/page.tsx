@@ -1,8 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import Link from 'next/link';
-import { toast } from 'react-hot-toast'; // or your preferred toast lib
+import { toast } from 'react-hot-toast';
 
 interface Job {
   _id: string;
@@ -19,20 +19,22 @@ export default function EmployerJobList() {
   useEffect(() => {
     const getJobs = async () => {
       try {
-        const { data } = await axios.get('/api/employer/jobs');
+        const { data } = await axios.get<{ success: boolean; jobs: Job[] }>('/api/employer/jobs');
+
         if (data.success && data.jobs) {
           setJobs(data.jobs);
           console.log(data.jobs);
-          
         } else {
           toast.error('Error getting jobs');
         }
-      } catch (error:any) {
-        toast.error('Error getting jobs', error);
+      } catch (error) {
+        const err = error as AxiosError<{ message?: string }>;
+        toast.error(err.response?.data?.message || 'Error getting jobs');
       } finally {
         setLoading(false);
       }
     };
+
     getJobs();
   }, []);
 
@@ -53,7 +55,10 @@ export default function EmployerJobList() {
       ) : (
         <div className="grid gap-4">
           {jobs.map((job) => (
-            <div key={job._id} className="bg-white p-6 rounded-xl shadow-md flex justify-between items-center">
+            <div
+              key={job._id}
+              className="bg-white p-6 rounded-xl shadow-md flex justify-between items-center"
+            >
               <div>
                 <h2 className="text-lg font-semibold text-gray-800">{job.title}</h2>
                 <p className="text-gray-500">

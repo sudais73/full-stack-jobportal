@@ -60,9 +60,9 @@ export default function LandingPage() {
         <Image
         width={1000}
         height={500}
-          src="/hero.png"
+          src="/landing.avif"
           alt="Hero Illustration"
-          className="w-full max-w-md md:max-w-lg rounded-lg"
+          className="w-full max-w-md md:max-w-lg rounded-lg h-full"
         />
       </motion.div>
     </main>
